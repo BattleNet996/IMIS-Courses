@@ -1,0 +1,871 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Dec 19 21:37:34 2020
+
+@author: 白白
+"""
+
+import PySide2
+import sys
+import os
+# import pymssql
+import numpy as np
+import random
+import pandas as pd
+
+
+dirname = os.path.dirname(PySide2.__file__)
+plugin_path = os.path.join(dirname, 'plugins', 'platforms')
+os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = plugin_path
+
+
+from PySide2.QtWidgets import QApplication,QMessageBox,QMainWindow,QTextBrowser,QSpinBox,QLabel
+from PySide2.QtUiTools import QUiLoader
+from PySide2.QtCore import QFile
+from PySide2.QtGui import QIcon,QPixmap
+
+# server="DESKTOP-6AB6V57"#服务器名称
+# user="sa"#账户名称
+# pwd="123456"#密码
+# db="MBG"#数据库名称
+#
+# def GetConnect():
+#     conn = pymssql.connect(host=server,user=user,password=pwd,database=db,charset="utf8")
+#     cur=conn.cursor()
+#     if not cur:
+#         raise(NameError,"连接失败")
+#     else:
+#         print("连接成功")
+#         return cur
+
+def picname(bossdict,baoguodict):
+    for i in bossdict.items():
+        formerfile = './cards/'+i[1]+'.png'
+        newfile = './cards/boss'+i[0]+'.png'
+        os.rename(formerfile,newfile)
+    for j in baoguodict.items():
+        formerfile = './cards/'+j[1]+'.png'
+        newfile = './cards/baoguo'+j[0]+'.png'
+        os.rename(formerfile,newfile)
+
+def rename(bossdict,baoguodict):
+    for i in bossdict.items():
+        formerfile = './cards/boss'+i[0]+'.png'
+        newfile = './cards/'+i[1]+'.png'
+        os.rename(formerfile,newfile)
+    for j in baoguodict.items():
+        formerfile = './cards/baoguo'+j[0]+'.png'
+        newfile = './cards/'+j[1]+'.png'
+        os.rename(formerfile,newfile)
+        
+def rolename(num):
+    formerfile = './role/'+str(num+1)+'.png'
+    newfile = './role/boss.png'
+    os.rename(formerfile,newfile)
+
+def rerolename(num):
+    formerfile = './role/boss.png'
+    newfile = './role/'+str(num+1)+'.png'
+    os.rename(formerfile,newfile)
+        
+
+
+
+##login 和reminder 类用于登陆界面和密码审核
+class login():
+    flag = True
+    def __init__(self):
+        #从文件中加载UI定义
+        fileinitial = QFile('登陆界面.ui')
+        fileinitial.open(QFile.ReadOnly)
+        fileinitial.close()
+        self.window = QUiLoader().load(fileinitial)
+        self.window.start.clicked.connect(self.push)
+        self.window.cancel1.clicked.connect(self.close)
+    #定义pushbotton处理机制（记录用户名和口令）
+    def push(self):
+        self.aname = self.window.name.text()
+        self.apass = self.window.password.text()
+    #定义closebutton处理机制，改变flag
+    def close(self):
+        login.flag = False
+    
+#密码输入错误提示界面
+class reminder():
+    def __init__(self):
+        self.window1 = QMainWindow()
+        self.window1.resize(500,350)
+        self.window1.setWindowTitle('Caution!')
+        self.text = QTextBrowser(self.window1) 
+        self.text.move(100,100)
+        self.text.resize(300,200)
+        self.text.append(na+'同志！门禁密码错了，南京大学可不是那么好混进来的呦！')
+        
+#第一个故事界面
+class story1():
+    flag = 1
+    def __init__(self):
+        #从文件中加载UI定义
+        fileinitial = QFile('故事界面1.ui')
+        fileinitial.open(QFile.ReadOnly)
+        fileinitial.close()
+        self.window2 = QUiLoader().load(fileinitial)
+        self.window2.jump1.clicked.connect(self.jump1)
+        self.window2.next1.clicked.connect(self.next1)
+        self.window2.nextstep.clicked.connect(self.nextstep)
+    def jump1(self):
+        story1.flag = -1
+    def next1(self):
+        story1.flag = 0
+    def nextstep(self):
+        self.window2.nextstep.setText('别点我')
+        self.window2.nextstep.setEnabled(False)
+        self.window2.Browser1.setPlainText('哦哦，原来是有两个年轻人在南大学信管，头发学秃了，马老师你能不能教教我混元功法。')
+        self.window2.Browser1.ensureCursorVisible()
+        self.window2.Browser1.reload()
+
+class story2():
+    flag = 1
+    rank = '0'
+    def __init__(self):
+        #从文件中加载UI定义
+        fileinitial = QFile('故事界面2.ui')
+        fileinitial.open(QFile.ReadOnly)
+        fileinitial.close()
+        self.window3 = QUiLoader().load(fileinitial)
+        self.window3.next2.clicked.connect(self.next2)
+        self.window3.next2.setEnabled(False)
+        self.window3.quit1.clicked.connect(self.quit1)
+        self.window3.e.clicked.connect(self.e)
+        self.window3.q.clicked.connect(self.q)
+        self.window3.w.clicked.connect(self.w)
+        
+    def next2(self):
+        story2.flag = 0
+    def quit1(self):
+        story2.flag = -1
+    def e(self):
+        story2.rank = 'e'
+        self.window3.remind.setPlainText('平平淡淡才是真！')
+        self.window3.next2.setEnabled(True)
+        self.window3.e.setEnabled(False)
+        self.window3.q.setEnabled(False)
+        self.window3.w.setEnabled(False)
+    def q(self):
+        story2.rank = 'q'
+        self.window3.next2.setEnabled(True)
+        self.window3.e.setEnabled(False)
+        self.window3.q.setEnabled(False)
+        self.window3.w.setEnabled(False)
+    def w(self):
+        story2.rank = 'w'
+        self.window3.next2.setEnabled(True)
+        self.window3.e.setEnabled(False)
+        self.window3.q.setEnabled(False)
+        self.window3.w.setEnabled(False)
+
+class game11():
+    flag = 1
+    flag1 = 1
+    def __init__(self):
+        #从文件中加载UI定义
+        fileinitial = QFile('游戏界面11.ui')
+        fileinitial.open(QFile.ReadOnly)
+        fileinitial.close()
+        self.window4 = QUiLoader().load(fileinitial)
+        self.window4.next3.clicked.connect(self.next3)
+        self.window4.dui.clicked.connect(self.dui)
+        self.window4.dui2.hide()
+        self.window4.dui2.clicked.connect(self.dui2)
+
+    def next3(self):
+        game11.flag = -1
+    def dui(self):
+        self.window4.dui.hide()
+        self.window4.baoguo.setPlainText('你在自习室练死劲儿，不好用。')
+        self.window4.play.clear()
+        self.window4.dui2.show()
+    def dui2(self):
+        self.window4.dui2.hide()
+        self.window4.play.setPlainText('我非要和你试试。')
+
+
+class game12():
+    flag = True
+    bosscardflag = 0
+    baoguocardflag = 0
+    def __init__(self):
+        #从文件中加载UI定义
+        fileinitial = QFile('游戏界面12.ui')
+        fileinitial.open(QFile.ReadOnly)
+        fileinitial.close()
+        self.window5 = QUiLoader().load(fileinitial)
+         self.window5.bosshair.setRange(0,10)
+        self.window5.bosshair.setValue(10)
+        self.window5.bossdefend.setRange(0,1)
+        self.window5.bossdefend.setValue(1)
+        self.window5.bossattack.setRange(0,6)
+        self.window5.bossattack.setValue(6)
+        self.window5.baoguohair.setRange(0,20)
+        self.window5.baoguohair.setValue(20)
+        self.window5.baoguodefend.setRange(0,2)
+        self.window5.baoguodefend.setValue(2)
+        self.window5.baoguoattack.setRange(0,10)
+        self.window5.baoguoattack.setValue(10)
+        
+        self.window5.bossbutton1.clicked.connect(self.bossbutton1)
+        self.window5.bossbutton2.clicked.connect(self.bossbutton2)
+        self.window5.bossbutton3.clicked.connect(self.bossbutton3)
+        self.window5.baobutton1.clicked.connect(self.baoguobutton1)
+        self.window5.baobutton2.clicked.connect(self.baoguobutton2)
+        self.window5.baobutton3.clicked.connect(self.baoguobutton3)
+        self.window5.q.clicked.connect(self.q)
+        
+    def bossbutton1(self):
+        self.window5.bossbutton1.setEnabled(False)
+    def bossbutton2(self):
+        self.window5.bossbutton2.setEnabled(False)
+    def bossbutton3(self):
+        self.window5.bossbutton3.setEnabled(False)
+    def baoguobutton1(self):
+        self.window5.baobutton1.setEnabled(False)
+        self.window5.bosshair.setValue(7)
+    def baoguobutton2(self):
+        self.window5.baobutton2.setEnabled(False)
+    def baoguobutton3(self):
+        self.window5.baobutton3.setEnabled(False)
+        self.window5.bosshair.setValue(9)
+    def q(self):
+        game12.ind = 'q'
+
+
+class game2():
+    flag = True
+    bosscardflag = 0
+    baoguocardflag = 0
+    def __init__(self):
+        #从文件中加载UI定义
+        fileinitial = QFile('游戏界面2.ui')
+        fileinitial.open(QFile.ReadOnly)
+        fileinitial.close()
+        self.window5 = QUiLoader().load(fileinitial)
+        self.window5.bosshair.setRange(0,10)
+        self.window5.bosshair.setValue(10)
+        self.window5.bossdefend.setRange(0,1)
+        self.window5.bossdefend.setValue(1)
+        self.window5.bossattack.setRange(0,6)
+        self.window5.bossattack.setValue(6)
+        self.window5.baoguohair.setRange(0,20)
+        self.window5.baoguohair.setValue(20)
+        self.window5.baoguodefend.setRange(0,2)
+        self.window5.baoguodefend.setValue(2)
+        self.window5.baoguoattack.setRange(0,10)
+        self.window5.baoguoattack.setValue(10)
+        
+        self.window5.bossbutton1.clicked.connect(self.bossbutton1)
+        self.window5.bossbutton2.clicked.connect(self.bossbutton2)
+        self.window5.bossbutton3.clicked.connect(self.bossbutton3)
+        self.window5.baobutton1.clicked.connect(self.baoguobutton1)
+        self.window5.baobutton2.clicked.connect(self.baoguobutton2)
+        self.window5.baobutton3.clicked.connect(self.baoguobutton3)
+        self.window5.q.clicked.connect(self.q)
+        
+    def bossbutton1(self):
+        self.window5.bossbutton1.setEnabled(False)
+    def bossbutton2(self):
+        self.window5.bossbutton2.setEnabled(False)
+    def bossbutton3(self):
+        self.window5.bossbutton3.setEnabled(False)
+    def baoguobutton1(self):
+        self.window5.baobutton1.setEnabled(False)
+        self.window5.bosshair.setValue(7)
+    def baoguobutton2(self):
+        self.window5.baobutton2.setEnabled(False)
+    def baoguobutton3(self):
+        self.window5.baobutton3.setEnabled(False)
+        self.window5.bosshair.setValue(9)
+    def q(self):
+        game12.ind = 'q'
+
+
+class game3():
+    flag = True
+    bosscardflag = 0
+    baoguocardflag = 0
+    def __init__(self):
+        #从文件中加载UI定义
+        fileinitial = QFile('游戏界面3.ui')
+        fileinitial.open(QFile.ReadOnly)
+        fileinitial.close()
+        self.window5 = QUiLoader().load(fileinitial)
+        self.window5.bosshair.setRange(0,55)
+        self.window5.bosshair.setValue(55)
+        self.window5.bossdefend.setRange(0,1)
+        self.window5.bossdefend.setValue(1)
+        self.window5.bossattack.setRange(0,6)
+        self.window5.bossattack.setValue(6)
+        self.window5.baoguohair.setRange(0,20)
+        self.window5.baoguohair.setValue(20)
+        self.window5.baoguodefend.setRange(0,2)
+        self.window5.baoguodefend.setValue(2)
+        self.window5.baoguoattack.setRange(0,10)
+        self.window5.baoguoattack.setValue(10)
+        
+        self.window5.bossbutton1.clicked.connect(self.bossbutton1)
+        self.window5.bossbutton2.clicked.connect(self.bossbutton2)
+        self.window5.bossbutton3.clicked.connect(self.bossbutton3)
+        self.window5.baobutton1.clicked.connect(self.baoguobutton1)
+        self.window5.baobutton2.clicked.connect(self.baoguobutton2)
+        self.window5.baobutton3.clicked.connect(self.baoguobutton3)
+        self.window5.q.clicked.connect(self.q)
+        
+    def bossbutton1(self):
+        self.window5.bossbutton1.setEnabled(False)
+    def bossbutton2(self):
+        self.window5.bossbutton2.setEnabled(False)
+    def bossbutton3(self):
+        self.window5.bossbutton3.setEnabled(False)
+    def baoguobutton1(self):
+        self.window5.baobutton1.setEnabled(False)
+        self.window5.bosshair.setValue(7)
+    def baoguobutton2(self):
+        self.window5.baobutton2.setEnabled(False)
+        self.window5.bosshair.setValue(0)
+        self.window5.ok.SetText('下一步')
+
+    def baoguobutton3(self):
+        self.window5.baobutton3.setEnabled(False)
+        self.window5.bosshair.setValue(45)
+    def q(self):
+        game12.ind = 'q'
+
+class end1():
+    flag = 1
+    def __init__(self):
+        #从文件中加载UI定义
+        fileinitial = QFile('结尾1.ui')
+        fileinitial.open(QFile.ReadOnly)
+        fileinitial.close()
+        self.window2 = QUiLoader().load(fileinitial)
+        self.window2.jump1.clicked.connect(self.jump1)
+        self.window2.next1.clicked.connect(self.next1)
+        self.window2.nextstep.clicked.connect(self.nextstep)
+    def jump1(self):
+        story1.flag = -1
+    def next1(self):
+        story1.flag = 0
+    def nextstep(self):
+        self.window2.nextstep.setText('别点我')
+        self.window2.nextstep.setEnabled(False)
+        self.window2.Browser1.setPlainText('马保国：我可不是乱来，我可有Uber而来~\n下面诸位请听听我送给南大信管的获奖致辞：')
+        self.window2.Browser1.ensureCursorVisible()
+        self.window2.Browser1.reload()
+
+class end2():
+    flag = 1
+    def __init__(self):
+        #从文件中加载UI定义
+        fileinitial = QFile('结尾界面.ui')
+        fileinitial.open(QFile.ReadOnly)
+        fileinitial.close()
+        self.window2 = QUiLoader().load(fileinitial)
+        
+class Card():
+    """卡牌类对象"""
+
+    def __init__(self, name, hair, attack, defend, type, _class):
+        """对卡牌进行初始化，有卡排名、加血量、攻击量、防御量五大属性"""
+        self.name = name
+        self.hair = hair
+        self.attack = attack
+        self.defend = defend
+        self.type = type
+        self._class = _class
+
+    def info_show_card(self):
+        """显示卡牌的信息"""
+        print("*****Loading Card*****")
+        print("Name： ", self.name)
+
+        print("Hair： ", self.hair)
+
+        print("Attack： ", self.attack)
+
+        print("Defend： ", self.defend)
+
+        print("Type： ", self.type)
+
+        print("Class: ", self._class)
+
+    def reset_card(self,temp_card,skill):
+        if skill.hair != 0:
+            temp_card.hair *= skill.hair
+        if skill.attack != 0:
+            temp_card.attack *= skill.attack
+        if skill.defend !=0 :
+            temp_card.defend *= skill.defend
+        return temp_card
+class Role():
+    """人物对象"""
+
+    def __init__(self, cno, character, hair, attack, defend, level, type,card_remain_num=0):
+        """对人物进行初始化，有角色CNO，角色名、血量、攻击力、防御力、等级、角色人机类型、角色攻防类型，角色剩余卡牌9大属性"""
+
+        self.cno = cno
+        self.character = character
+        self.hair = hair
+        self.attack = attack
+        self.defend = defend
+        self.level = level
+        self.type = type
+        self.card_remain_num = card_remain_num
+        self.card_remain_list = []
+        self.ctype = list(character_type.loc[character_type["cno"] == self.cno]["ctype"].values)[0]
+        #首先用人物的CNO与技能的SNO配对，将人物的技能命名为SNO！
+        sno = list(character_skill.loc[character_skill["cno"]==self.cno]["sno"].values)[0] #根据人技匹配表(cno)获取人物的技能
+        self.skill = skill_dict[sno]   #获得Skill对象
+
+    def info_show_role(self):
+        """显示人物的信息"""
+        print("*****Loading Role*****")
+        print("Character： ", self.character)
+
+        print("Hair： ", self.hair)
+
+        print("Attack： ", self.attack)
+
+        print("Defend： ", self.defend)
+
+        print("Level： ", self.level)
+
+        print("Type： ", self.type)
+
+        print('Ctype:  ',self.ctype )
+
+        print("Card_remain_num： ", self.card_remain_num)
+
+
+    def attackted(self, harm):
+        """实现对人物属性的修改，对接攻击卡牌功能"""
+        self.hair -= harm - self.defend
+        print("==========你减少了对方" + str(harm - self.defend) + "点发量==========")
+
+    def buffed(self, hair, attack, defend):
+        """实现对人物属性的修改，对接增益卡牌功能"""
+        if hair > 0 :
+            self.hair += hair
+            print("==========你的发量恢复了" + str(hair) + "点==========")
+        elif attack > 0:
+            self.attack += attack
+            print("==========你的攻击增加了了" + str(attack) + "点==========")
+        elif defend > 0:
+            self.defend += defend
+            print("==========你的防御增加了了" + str(defend) + "点==========")
+
+    def get_card(self):
+        """人物根据手牌余数进行抽牌"""
+
+        self.card_remain_list += card_shuffle(card_list, self.card_remain_num, self.type)
+
+    def use_skill(self):
+        """使用技能，如果是对卡牌造成影响，返回一个真值"""
+        skill_flag = self.skill.skill_function(self)
+        return skill_flag
+
+    def card_function(self, card, role2):
+        """实现卡牌的效果"""
+        if card._class == "攻击类":
+            role2.attackted(card.attack + self.attack)
+        else:
+            self.buffed(card.hair, card.attack, card.defend)
+
+
+    def type_check(self,role2):
+        """检查人物的属性，并判定是否能够发动技能"""
+        if self.ctype == "智" and role2.ctype=="防":
+            check = 1
+        if self.ctype == "防" and role2.ctype == "攻":
+            check = 1
+        if self.ctype == "攻" and role2.ctype == "智":
+            check = 1
+        if self.ctype == "防" and role2.ctype == "智":
+            check = 0
+        if self.ctype == "攻" and role2.ctype == "防":
+            check = 0
+        if self.ctype == "智" and role2.ctype == "攻":
+            check = 0
+        else:
+            check = 1
+        return check
+
+    def use_card(self, role2):
+        """模拟人物使用卡牌的动作"""
+        typecheck = self.type_check(role2)
+        if typecheck:
+            print("Tips：你发动了你的人物技能 <" + self.skill.skill + "> 对你的人物与手牌产生了增益")
+            flag = self.use_skill()  #玩家发动技能，flag表示是否对卡牌产生效果
+
+            self.card_remain_num = len(self.card_remain_list)
+            while self.card_remain_num > 0:
+                # 先展示人物的手牌
+                for i in range(self.card_remain_num):
+                    print("*****您手里的第" + str(i + 1) + "/" + str(self.card_remain_num) + "张牌是******")
+                    self.card_remain_list[i].info_show_card()
+
+                # 用户自定义选择手牌的使用
+                ind = input("告诉我您想使用哪一张手牌（输入数字）/ 如果放弃使用(‘q’)，将进入对方回合：")
+                if ind == "q":
+                    break
+                else:
+                    ind = int(ind)
+                    while ind >= self.card_remain_num + 1:
+                        print("Warning: Out of range")
+                        ind = int(input("请重新输入："))
+
+                    print("*****您正在使用第" + str(ind) + "张手牌*****")
+                    print("*****您的手牌数减1*****")
+                    if flag:
+                        temp_card = self.card_remain_list[ind - 1]
+                        temp_card = (self.card_remain_list[ind - 1]).reset_card(temp_card,self.skill)
+                        # 实现卡牌的效果并打印
+                        print("*****现在双方的信息发生了如下变动******")
+
+                        self.card_remain_num -= 1
+
+                        self.card_function(temp_card, role2)
+                        player.info_show_role()
+                        bot.info_show_role()
+                    else:
+                        # 实现卡牌的效果并打印
+                        print("*****现在双方的信息发生了如下变动******")
+
+                        self.card_remain_num -= 1
+
+                        self.card_function(self.card_remain_list[ind - 1], role2)
+                        player.info_show_role()
+                        bot.info_show_role()
+
+                    print("*****你的手牌发生了变动******")
+                    self.card_remain_list.pop(ind - 1)
+        else:
+            print("Tips：你被对方克制，技能发动受限")
+            self.card_remain_num = len(self.card_remain_list)
+            while self.card_remain_num > 0:
+                # 先展示人物的手牌
+                for i in range(self.card_remain_num):
+                    print("*****您手里的第" + str(i + 1) + "/" + str(self.card_remain_num) + "张牌是******")
+                    self.card_remain_list[i].info_show_card()
+
+                # 用户自定义选择手牌的使用
+                ind = input("告诉我您想使用哪一张手牌（输入数字）/ 如果放弃使用(‘q’)，将进入对方回合：")
+                if ind == "q":
+                    break
+                else:
+                    ind = int(ind)
+                    while ind >= self.card_remain_num + 1:
+                        print("Warning: Out of range")
+                        ind = int(input("请重新输入："))
+
+                    print("*****您正在使用第" + str(ind) + "张手牌*****")
+                    print("*****您的手牌数减1*****")
+                    # 实现卡牌的效果并打印
+                    print("*****现在双方的信息发生了如下变动******")
+
+                    self.card_remain_num -= 1
+
+                    self.card_function(self.card_remain_list[ind - 1], role2)
+                    player.info_show_role()
+                    bot.info_show_role()
+
+                print("*****你的手牌发生了变动******")
+                self.card_remain_list.pop(ind - 1)
+
+
+class Skill():
+    """人物技能"""
+
+    def __init__(self, sno,skill, hair, attack, defend, process, object):
+        self.sno = sno
+        self.skill = skill
+        self.hair = hair
+        self.attack = attack
+        self.defend = defend
+        self.process = process
+        self.object = object
+
+
+    def skill_function(self,role):
+        """发挥skill的作用"""
+
+        if self.object == "character":
+            if self.hair > 0:
+                role.hair += self.hair;
+                print("你回复了"+str(self.hair)+"点发量")
+            if self.attack > 0:
+                role.attack += self.attack;
+                print("你获得了"+str(self.attack)+"点攻击力")
+            if self.defend > 0:
+                role.defend += self.defend;
+                print("你获得了" + str(self.defend) + "点防御力")
+            return 0
+        else:
+            if self.hair >0:
+                print("你恢复性手牌将产生"+str(self.hair)+"倍的效果")
+            if self.attack>0:
+                print("你攻击性手牌将产生" + str(self.attack) + "倍的效果")
+            if self.defend>0:
+                print("你防御性手牌将产生" + str(self.defend) + "倍的效果")
+            return 1  #如果返回1，说明要对卡牌起作用
+
+def game_start():
+    """游戏进入"""
+    print("Welcom to 《The Great Ma》")
+    pass
+
+
+def game_over():
+    """游戏结束时调用"""
+    print("主持人：感谢马老师为我们带来的精彩表演，请马老师说出您的获奖感言！")
+    print("马保国：我可不是乱来，我可有Uber而来~下面诸位请听听我送给南大信管的获奖致辞：")
+    print("【信管人，信管魂】"
+          "“信自己，管天下”是他们坚定的信念。“\n"
+          "手握日月摘星辰，信管内卷不当人。”线代、数据库不在话下，\n"
+          "C++、R语言、数据库门门精通。在南大这片汪洋大海，每位信管人都是跃动在潮头的蓝鲸，\n"
+          "探索知识深处的奥秘。今天，他们化鱼为鹏，在数据库课上起飞。“大鹏一日乘风起,扶摇直上九万里”。\n"
+          "信息管理，掌管信息和智慧，更掌管人生每一场比赛。今日，他们将以最饱满的热情投身学习，为美好的青春留下浓墨重彩的华章！")
+
+
+def gne_role(roles_df):
+    """传入一个存储人物信息的数据框，并据此进行初始化，返回人物对象列表"""
+    role_list = []  # 建立一个存储Role对象的列表
+    role_for_player = []
+    role_for_bot = []
+    for i in range(len(roles_df)):
+        temp = Role(roles_df.iloc[i,6],roles_df.iloc[i, 0], roles_df.iloc[i, 1], roles_df.iloc[i, 2], roles_df.iloc[i, 3],
+                    roles_df.iloc[i, 4], roles_df.iloc[i, 5])
+        if (roles_df.iloc[i, 5] == "player"):
+            role_for_player.append(temp)
+        else:
+            role_for_bot.append(temp)
+    role_list = [role_for_player, role_for_bot]
+    return role_list
+
+
+def gne_card(card_df):
+    """传入一个存储卡片信息的数据框，并据此进行初始化，返回卡牌对象列表（既包含玩家卡牌，也包含机器人卡牌）"""
+    card_list = []  # 建立一个存储card对象的列表
+    card_for_player = []
+    card_for_bot = []
+    for i in range(len(card_df)):
+        temp = Card(card_df.iloc[i, 0], card_df.iloc[i, 1], card_df.iloc[i, 2], card_df.iloc[i, 3], card_df.iloc[i, 4],
+                    card_df.iloc[i, 5])
+        if (card_df.iloc[i, 4] == "player"):
+            card_for_player.append(temp)
+        else:
+            card_for_bot.append(temp)
+    card_list = [card_for_player, card_for_bot]
+    return card_list
+
+def gne_skill(skill_df):
+    """传入一个存储技能信息的数据框，并据此进行初始化，返回人物对象列表（既包含玩家卡牌，也包含机器人卡牌）"""
+    skill_dict = {}  # 建立一个存储card对象的字典.键为“sno”，值为对象
+
+    for i in range(len(skill_df)):
+        temp = Skill(skill_df.iloc[i, 0], skill_df.iloc[i, 1], skill_df.iloc[i, 2], skill_df.iloc[i, 3], skill_df.iloc[i, 4],
+                    skill_df.iloc[i, 5],skill_df.iloc[i,6])
+        skill_dict[skill_df.iloc[i, 0]] = temp;
+    return skill_dict
+
+
+def story_telling():
+    """场景的进入：显示每一个场景开始时的任务旁白和对话"""
+    pass
+
+
+def skill_function():
+    """完成人物技能的显示和效用发挥"""
+    pass
+
+
+def match_enemy(role_list):
+    """进行人物匹配，并以此为依据作为场景事件划分，结果返回一个列表，列表的两个元素分别为player和bot"""
+    player = role_list[0][scene]  # 选择本场景的玩家role对象
+    bot = role_list[1][scene]  # 选择本场景的敌方的role对象
+    print("*****" + player.character + " VS " + bot.character + "******")
+    match_list = [player, bot]
+    return match_list
+
+
+def card_shuffle(card_list, remain_num, type):
+    """将卡牌的抽取并存放进列表中，并完成发放，返回发放所得的列表"""
+    shuffled_card_list = []
+    if type == "player":
+        for i in range(3 - remain_num):
+            ind = random.randint(0, len(card_list[0]) - 1)
+            shuffled_card_list.append(card_list[0][ind])
+    else:
+        for i in range(3 - remain_num):
+            ind = random.randint(0, len(card_list[1]) - 1)
+            shuffled_card_list.append(card_list[1][ind])
+    return shuffled_card_list
+
+
+# 辅助/通用功能
+def info_show_role():
+    """显示人物的信息"""
+    pass
+
+
+def info_show_card():
+    """显示卡牌信息"""
+    pass
+
+
+
+if __name__=='__main__':
+    app = QApplication([]) #主界面
+    app.setWindowIcon(QIcon('logo.png'))
+    test1 = login()           
+    test1.window.show()  #窗口显示
+    test1.push()
+    app.exec_() 
+    na = test1.aname
+    test2 = reminder()
+    story1 = story1()
+    story2 = story2()
+    game11 = game11()
+    
+    if login.flag ==True:    
+        while test1.apass != '123456' and login.flag ==True:
+            test2.window1.show()
+            app.exec_()     #进入事件处理循环
+            test1.window.show()
+            app.exec_()
+        # if login.flag ==True:
+        story1.window2.show()
+        app.exec_()     #进入事件处理循环   
+        if story1.flag == 0:
+            story2.window3.show()
+            rank = story2.rank
+            app.exec_()
+        game11.window4.show()
+        app.exec_()
+        if story2.flag == 0 or story1.flag == -1:
+            game12 = game12()
+            game12.window5.show()
+            app.exec_()
+            game2 = game2()
+            game2.window5.show()
+            app.exec_()
+            game3 = game3()
+            game3.window5.show()
+            app.exec_()
+            end1 = end1()
+            end1.window2.show()
+            app.exec_()
+            if story1.flag == 0:
+                end2 = end2()
+                end2.window2.show()
+                app.exec_()
+
+
+    # 游戏开始
+    game_start()
+
+    # 初始化场景、技能、卡牌和角色
+    scene = 0  # 控制变量，场景序数
+    skill_dict = gne_skill(skills)
+    card_list = gne_card(cards)
+    role_lst = gne_role(roles)
+
+    # 选择游戏模式
+    rank = input("*****请选择游戏难度：①地狱级(q)；②无敌版(w)；③正常版(e)；*****")
+    if rank == 'q':
+        roles.loc[0:5,].loc[:,"attack"] =  [3*i for i in list(roles.loc[0:5,].loc[:,"attack"])]
+        print("*****游戏难度提升了哦，快来感受老师对你的爱吧~******")
+    elif rank == 'w':
+        roles.loc[5:11, ].loc[:,"attack"] = [10*i for i in list(roles.loc[5:11, ].loc[:,"attack"])]
+        print("*****劝马老师您耗子尾汁~******")
+    else:
+        pass
+
+    while ((scene + 1) <= 5):
+        # 1、场景进入
+        print("")
+        print("")
+        print("***** Scene " + str(scene + 1) + "******")
+
+        # 2、人物匹配
+        # 2.0 人物初始化
+        role_lst = gne_role(roles)
+        # for i in range(2):
+        #     for j in range(len(role_lst[i])):
+        #          role_lst[i][j].info_show_role()
+
+        # 2.1 战斗匹配
+        match_list = match_enemy(role_lst)  # math_list = [player,bot]
+        player = match_list[0]
+        bot = match_list[1]
+
+        # 3、人物战斗
+        # 3.0 卡牌初始化
+        card_list = gne_card(cards)
+
+        # 3.1 技能初始化
+        skill_dict = gne_skill(skills)
+
+
+        # 3.2 技能匹配，卡牌发放与人物战斗
+        round = 1
+        while player.hair > 0 and bot.hair > 0:
+
+            print("")
+            print("")
+            print("*****round " + str(round) + "*****")
+            print("【马保国先手】")
+            # 首先是玩家抽牌，发动技能，并使用
+            player.get_card()
+            player.use_card(bot)
+
+
+            if bot.hair < 0:
+                print("Results: 马保国赢得了这场比赛")
+                print("你已经打败了", bot.character)
+                print("【Congratulations】 Levels Up!")
+                break
+
+            # 其次是机器人抽牌，发动技能并使用
+            if bot.hair > 0:
+                print("【信管的回合】")
+                bot.get_card()
+                bot.use_card(player)
+
+
+
+            round += 1
+
+        if player.hair < 0:
+            print("Results：南大信管永远滴神！")
+            print("Results：马保国骂骂咧咧地退出了游戏直播间")
+            break
+
+
+
+
+        if scene+1 <= 5:
+            flag = input("是否继续下一关卡(y/n?)")
+            if flag == "n":
+                print("游戏结束，下次再见~")
+                break
+            else:
+                scene += 1
+
+
+    # 游戏结束
+    if player.hair >0:
+        print("已经刷到底啦，未来的路还在继续，马老师加油~")
+        game_over()
+                
+            
+            
+
