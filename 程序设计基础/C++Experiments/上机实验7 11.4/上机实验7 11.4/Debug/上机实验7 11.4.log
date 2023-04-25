@@ -1,4 +1,0 @@
-﻿  源.cpp
-C:\Users\admin\source\repos\上机实验7 11.4\上机实验7 11.4\源.cpp(319,18): warning C4244: “+=”: 从“double”转换到“int”，可能丢失数据
-C:\Users\admin\source\repos\上机实验7 11.4\上机实验7 11.4\源.cpp(314,6): warning C4101: “avg”: 未引用的局部变量
-  上机实验7 11.4.vcxproj -> C:\Users\admin\source\repos\上机实验7 11.4\Debug\上机实验7 11.4.exe
